@@ -1,0 +1,4 @@
+# FreeSWEIXIN
+
+FreeSWITCH and Weixin
+
