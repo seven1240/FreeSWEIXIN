@@ -13,17 +13,6 @@
 
 start() ->
 	application:start(cowboy),
-	Dispatch = [
-	    %% {Host, list({Path, Handler, Opts})}
-	    {'_', [{[<<"weixin">>], web_weixin_handler, []}]},
-	    {'_', [{'_', web_default_handler, []}]}
-	],
-	%% Name, NbAcceptors, Transport, TransOpts, Protocol, ProtoOpts
-	cowboy:start_listener(my_http_listener, 100,
-	    cowboy_tcp_transport, [{port, 8088}],
-	    cowboy_http_protocol, [{dispatch, Dispatch}]
-	),
-
 	application:start(freesweixin).
 
 start(_StartType, _StartArgs) ->
