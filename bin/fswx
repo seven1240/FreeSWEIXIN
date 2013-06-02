@@ -1,0 +1,124 @@
+#!/bin/bash
+
+#-------------------------------------------------------------------
+#
+# @doc start up script, in develop mode with an Erlang console
+#-------------------------------------------------------------------
+
+NAME=freesweixin_app
+SERVER_NAME="-sname $NAME@localhost"
+#SERVER_NAME="-name $NAME@{ipaddr}"
+COOKIE=ClueCon
+CONFIG="-config $NAME"
+DEFAULT_CONFIG="fswx.config"
+
+export ERL_MAX_PORTS=16384
+export RUN_ERL_LOG_GENERATIONS=100
+export RUN_ERL_LOG_MAXSIZE=10000000
+
+start_dev() {
+    if [ -z "$1" ]; then
+        CONFIG="-config $DEFAULT_CONFIG"
+    elif [[ "x$1" -eq "x-config" ]]; then
+        CONFIG="-config $2"
+    fi
+
+    echo Start $NAME using config $CONFIG
+
+    exec erl -pa $PWD/ebin $PWD/deps/*/ebin $PWD/mod/*/ebin -boot start_sasl\
+        -s reloader -s $NAME -s $SERVER_NAME\
+        -setcookie $COOKIE $CONFIG
+}
+
+start_server() {
+    if [[ $# -gt 1 && "x$1" -eq "x-config" ]]; then
+        CONFIG="-config $2"
+    fi
+
+    run_erl -daemon ./log/ ./log/ "exec erl -pa $PWD/ebin $PWD/deps/*/ebin $PWD/mod/*/ebin\
+        -boot start_sasl\
+        -s reloader -s $NAME -s $SERVER_NAME\
+        -setcookie $COOKIE $CONFIG"
+}
+
+stop_server() {
+    erl_call -a 'fswx stop' $SERVER_NAME -c $COOKIE
+    erl_call -a 'init stop' $SERVER_NAME -c $COOKIE
+}
+
+status() {
+    erl_call -a 'fswx status' $SERVER_NAME -c $COOKIE
+    echo
+}
+
+load_pos() {
+    exec erl -pa $PWD/ebin $PWD/deps/*/ebin $PWD/mod/*/ebin\
+        -boot start_sasl -s $NAME -s $SERVER_NAME\
+        -setcookie $COOKIE $CONFIG\
+        -noshell -eval "u_utils:load_pos()" -s init stop
+}
+
+reload_config() {
+    erl_call -a "u_utils reload_config []" $SERVER_NAME -c $COOKIE
+    echo
+}
+
+cd `dirname $0`
+cd ..
+
+case "$1" in
+    dev)
+        start_dev
+        ;;
+    start)
+        start_server $2 $3
+        ;;
+    server)
+        start_server $2 $3
+        ;;
+    stop)
+        stop_server
+        ;;
+    restart)
+        stop_server
+        sleep 3
+        start_server
+        ;;
+    reload)
+        echo "not implemented"
+        ;;
+    cli)
+        to_erl ./log/
+        ;;
+    console)
+        to_erl ./log/
+        ;;
+    load_pos)
+        load_pos
+        ;;
+    reload_config)
+        reload_config
+        ;;
+    ps)
+        ps aux|grep ola
+        ;;
+    queue)
+        queue $2 $3
+        ;;
+    status)
+        status
+        ;;
+    help)
+        echo
+        echo "fswx control script"
+        echo
+        echo "Usage: ./fswx [start | stop | restart | reload | cli | console | reload_config]"
+        echo "       ./fswx -config <config_file>"
+        echo "Example:"
+        echo "       ./fswx -config fswx.config"
+        echo
+        ;;
+    *)
+        start_dev $1 $2
+        ;;
+esac

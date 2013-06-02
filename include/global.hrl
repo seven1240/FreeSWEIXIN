@@ -1,0 +1,1 @@
+-define(LOG(Level, Format, Args), io:format(?MODULE_STRING ":~b [~s] " ++ Format ++ "~n", [?LINE, Level | Args])).
