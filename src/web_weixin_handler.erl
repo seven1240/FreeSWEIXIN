@@ -45,7 +45,7 @@ handle_get(Req, State) ->
 
 	case iolist_to_binary(SHAstr) of
 		Signature ->
-			{Peer, _} = cowboy_http_req:peer(Req),
+			{Peer, _} = cowboy_http_req:peer_addr(Req),
 			?LOG(debug, "peer:~p", [Peer]),
 			{ok, Req3} = cowboy_http_req:reply(200, [], EchoStr, Req);
 		_ ->
@@ -68,7 +68,7 @@ handle_post(Req, State) ->
 	Content = get_xml_text("Content", Doc),
 	MsgId = get_xml_text("MsgId", Doc),
 
-	{Peer, _} = cowboy_http_req:peer(Req),
+	{Peer, _} = cowboy_http_req:peer_addr(Req),
 	?LOG(debug, "peer:~p", [Peer]),
 
 	?LOG(debug, "to:~p from:~p ct:~p mt:~p mid:~p~n~p",
