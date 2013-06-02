@@ -26,7 +26,10 @@ start_link() ->
 init([]) ->
 	Dispatch = [
 	    %% {Host, list({Path, Handler, Opts})}
-	    {'_', [{[<<"weixin">>], web_weixin_handler, []}]},
+	    {'_', [
+			{[<<"weixin">>], web_weixin_handler, []},
+			{'_', web_default_handler, []}
+	    ]},
 	    {'_', [{'_', web_default_handler, []}]}
 	],
 

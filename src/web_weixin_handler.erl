@@ -38,9 +38,21 @@ handle_get(Req, State) ->
 	io:format("~p ~p~n", [Sorted, SHA]),
 	?LOG(info, "s:~s, t:~s, n:~s, e:~s", [Signature, Timestamp, Nonce, EchoStr]),
 
-	% SHA = Signature,
+	SHAstr = io_lib:format(
+		"~2.16.0b~2.16.0b~2.16.0b~2.16.0b~2.16.0b~2.16.0b~2.16.0b~2.16.0b~2.16.0b~2.16.0b"
+		"~2.16.0b~2.16.0b~2.16.0b~2.16.0b~2.16.0b~2.16.0b~2.16.0b~2.16.0b~2.16.0b~2.16.0b",
+		binary_to_list(SHA)),
 
-	{ok, Req3} = cowboy_http_req:reply(200, [], EchoStr, Req),
+	case iolist_to_binary(SHAstr) of
+		Signature ->
+			{Peer, _} = cowboy_http_req:peer(Req),
+			?LOG(debug, "peer:~p", [Peer]),
+			{ok, Req3} = cowboy_http_req:reply(200, [], EchoStr, Req);
+		_ ->
+			?LOG(warning, "~p~n~p", [iolist_to_binary(SHAstr), Signature]),
+			{ok, Req3} = cowboy_http_req:reply(500, [], <<"Error">>, Req)
+	end,
+
 	{ok, Req3, State}.
 
 handle_post(Req, State) ->
@@ -55,6 +67,9 @@ handle_post(Req, State) ->
 	MsgType = get_xml_text("MsgType", Doc),
 	Content = get_xml_text("Content", Doc),
 	MsgId = get_xml_text("MsgId", Doc),
+
+	{Peer, _} = cowboy_http_req:peer(Req),
+	?LOG(debug, "peer:~p", [Peer]),
 
 	?LOG(debug, "to:~p from:~p ct:~p mt:~p mid:~p~n~p",
 		[ToUserName, FromUserName, CreateTime, MsgType, MsgId, Content]),
