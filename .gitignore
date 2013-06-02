@@ -2,3 +2,5 @@ ebin
 erl_crash.dump
 /fswx.config
 /deps
+/log
+/priv/log4erl.conf

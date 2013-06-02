@@ -1,1 +1,1 @@
--define(LOG(Level, Format, Args), io:format(?MODULE_STRING ":~b [~s] " ++ Format ++ "~n", [?LINE, Level | Args])).
+-define(LOG(Level, Format, Args), log4erl:log(Level, ?MODULE_STRING ":~b " ++ Format ++ "~n", [?LINE | Args])).

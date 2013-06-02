@@ -4,7 +4,9 @@
 -export([init/3, handle/2, terminate/2]).
 
 -include_lib("xmerl/include/xmerl.hrl").
--include("global.hrl").
+% -include("global.hrl").
+-define(LOG(Level, Format, Args), log4erl:log(httpd, Level, ?MODULE_STRING ":~b " ++ Format ++ "~n", [?LINE | Args])).
+
 
 init({_Any, http}, Req, []) ->
 	{ok, Req, []}.

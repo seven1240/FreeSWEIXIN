@@ -12,6 +12,7 @@
 %% ===================================================================
 
 start() ->
+	log4erl:conf("priv/log4erl.conf"),
 	application:start(cowboy),
 	application:start(freesweixin).
 

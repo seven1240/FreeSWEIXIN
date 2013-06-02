@@ -6,7 +6,7 @@ cd `dirname $0`/..
 
 [ ! -f fswx.config ] && cp priv/samples/fswx.config fswx.config
 
-# cp priv/samples/log4erl.conf priv/log4erl.conf
+[ ! -f priv/log4erl.config ] && cp priv/samples/log4erl.conf priv/log4erl.conf
 
 make deps
 make
